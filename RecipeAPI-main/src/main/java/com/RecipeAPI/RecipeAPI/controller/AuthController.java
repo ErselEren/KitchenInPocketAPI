@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.RecipeAPI.RecipeAPI.entity.AuthResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,23 +34,28 @@ public class AuthController {
     UserRepository userRepository;
 
     @PostMapping("/signin")
-    public String authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public AuthResponse authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        // Find user by username
+        User user = userRepository.findByUsername(loginRequest.getUsername())
+                .orElseThrow(() -> new RuntimeException("Error: User not found."));
 
-        //find user by username
-        User user = userRepository.findByUsername(loginRequest.getUsername()).orElseThrow(() -> new RuntimeException("Error: User not found."));
-        //if user is not found, throw error
+        // If user is not found, return 404 Not Found
         if (user == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND).toString();
+            return new AuthResponse(null, "401");
         }
-        //if user is found, check password, don't use jwtresponse
+
+        // If user is found, check password
         if (user.getPassword().equals(loginRequest.getPassword())) {
-            return user.getId();
-        }
-        //if password is incorrect, throw error
-        else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED).toString();
+            // If password is correct, return user ID as JSON
+            return new AuthResponse(user.getId(), "200");
+            //return new ResponseEntity<>("{\"userId\": \"" + user.getId() + "\"}", HttpStatus.OK);
+        } else {
+            // If password is incorrect, return 401 Unauthorized
+            return new AuthResponse(null, "401");
+            //return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
     }
+
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
