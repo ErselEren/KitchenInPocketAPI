@@ -15,6 +15,15 @@ export default function LoginScreen(props) {
     const [showPassword, setShowPassword] = useState(false);
     const { setUserId } = useContext(UserContext);
 
+    useFocusEffect(
+      React.useCallback(() => {
+        setUserName("");
+        setPassword("");
+        setWrongPassword(false);
+      }, [])
+    );
+    
+
 
     const togglePasswordVisibility = () => {
       setShowPassword(!showPassword);
@@ -36,10 +45,6 @@ export default function LoginScreen(props) {
       setUserId(id);
     };
     
-    const updateToken = (token) => {
-      setUserToken(token);
-    };
-
     const handleSignin = async () => {
       //use fetchPostRequest to send username and password to server
       //if server returns true, navigate to home screen
@@ -68,21 +73,19 @@ export default function LoginScreen(props) {
           },
           body: JSON.stringify(body),
         });
-      
-        // Check if the response is in JSON format
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          // Parse and log the response as JSON
-          const jsonResponse = await response.json();
-          console.log('JSON Response:', jsonResponse);
-        } else {
-          // If not JSON, log the response as text
-          const textResponse = await response.text();
-          console.log('Text Response:', textResponse);
-          updateID(textResponse);
+
+        const responseData = await response.json();
+        console.log(responseData);
+        if(responseData.status == "200"){
+          console.log(responseData);
+          updateID(responseData.id);
 
           navigation.navigate("Home");
         }
+        else{
+          setWrongPassword(true);
+        }
+
       } catch (error) {
         throw new Error('Error posting data: ' + error.message);
       }
@@ -99,12 +102,12 @@ export default function LoginScreen(props) {
         </View>
                 
         <View style={{ backgroundColor: '#00000000', flexDirection: 'row', alignSelf:'center', top:20,borderBottomWidth:1, borderColor:'#FFFFFF',borderRadius: 10}}>
-          <TextInput onChangeText={(text) => updateUsername(text)} placeholder="Kullanıcı Adı" placeholderTextColor="#6E6E6E" style={{marginTop: 10, borderColor:'#FFFFFF', borderRadius: 10, width: '90%', marginBottom: 10, paddingLeft: 10, fontSize:20,color:'#DFB27E'  }}>
+          <TextInput onChangeText={(text) => updateUsername(text)} value={userName} placeholder="Kullanıcı Adı" placeholderTextColor="#6E6E6E" style={{marginTop: 10, borderColor:'#FFFFFF', borderRadius: 10, width: '90%', marginBottom: 10, paddingLeft: 10, fontSize:20,color:'#DFB27E'  }}>
           </TextInput>     
         </View>
         
         <View style={{flexDirection: 'row', alignSelf:'center', top:20, alignItems:'center', borderBottomWidth:1, borderColor:'#FFFFFF',borderRadius: 10}}>
-          <TextInput secureTextEntry={!showPassword} onChangeText={(text) => updatePassword(text)} placeholder="Şifre" placeholderTextColor="#6E6E6E" style={{marginTop: 10, borderColor:'#FFFFFF', borderRadius: 10, width: '85%', marginBottom: 10, paddingLeft: 10, fontSize:20,color:'#DFB27E'  }}>
+          <TextInput secureTextEntry={!showPassword} onChangeText={(text) => updatePassword(text)} value={password} placeholder="Şifre" placeholderTextColor="#6E6E6E" style={{marginTop: 10, borderColor:'#FFFFFF', borderRadius: 10, width: '85%', marginBottom: 10, paddingLeft: 10, fontSize:20,color:'#DFB27E'  }}>
           </TextInput> 
           <TouchableOpacity onPress={togglePasswordVisibility} style={{ right:10}}>
             <FontAwesome name="eye-slash" size={24} color="white" />
@@ -112,8 +115,8 @@ export default function LoginScreen(props) {
         </View>
         
           {wrongPassword ? (
-            <View style={{height:50, backgroundColor:'#FFFFFF'}}>
-              <Text>Şifre yanlış.</Text>
+            <View style={{height:50,width:'90%', justifyContent:'center',alignSelf:'center', backgroundColor:'#FFFFFF00', top:25}}>
+              <Text style={{textAlign:'center',color:'#FD8B8B'}}>Kullanıcı Adı veya Şifre yanlış.</Text>
             </View>
           ) : null}
         
