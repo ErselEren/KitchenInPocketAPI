@@ -42,7 +42,7 @@ export default function GetRecommendationScreen(props) {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': "Bearer "+"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" , // Replace with your actual API key
+                'Authorization': "Bearer "+"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" , // Replace with your actual API key
               },
               body: JSON.stringify({
                 model: "gpt-4",
@@ -65,7 +65,7 @@ export default function GetRecommendationScreen(props) {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': "Bearer "+"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" , // Replace with your actual API key
+                'Authorization': "Bearer "+"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" , // Replace with your actual API key
               },
               body: JSON.stringify({
                 model: "dall-e-3",
